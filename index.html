@@ -3,75 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>초등 과학 탐험대 챗봇 🚀</title>
+    <title>호기심 해결사 흥덕이 🚀</title>
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        :root { --main-color: #a2d2ff; --bg-color: #f0f8ff; }
+        :root { --main-color: #ffcfd2; --accent-color: #f1a7a7; --bg-color: #fff9f9; }
         body { font-family: 'Nanum Gothic', sans-serif; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .chat-container { width: 90%; max-width: 500px; background: white; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 80vh; overflow: hidden; }
-        .header { background-color: var(--main-color); color: white; padding: 20px; text-align: center; font-size: 1.2rem; font-weight: bold; }
-        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 80%; line-height: 1.5; font-size: 1rem; }
-        .bot { background: #e9ecef; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .user { background: var(--main-color); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .input-area { border-top: 1px solid #eee; padding: 15px; display: flex; gap: 10px; }
-        input { flex: 1; border: 2px solid var(--main-color); padding: 10px; border-radius: 10px; outline: none; }
-        button { background: var(--main-color); border: none; color: white; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #8bc2f0; }
+        .chat-container { width: 95%; max-width: 500px; background: white; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 85vh; overflow: hidden; border: 4px solid var(--main-color); }
+        .header { background-color: var(--main-color); color: #555; padding: 20px; text-align: center; font-size: 1.3rem; font-weight: bold; border-bottom: 2px solid var(--accent-color); }
+        #chat-window { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background-color: #fff; }
+        .msg { padding: 12px 18px; border-radius: 20px; max-width: 80%; line-height: 1.6; font-size: 1rem; word-break: break-all; position: relative; }
+        .bot { background: #fef2f2; align-self: flex-start; border-bottom-left-radius: 2px; color: #444; border: 1px solid #ffe4e6; }
+        .user { background: var(--main-color); color: #333; align-self: flex-end; border-bottom-right-radius: 2px; font-weight: bold; }
+        .input-area { border-top: 2px solid var(--main-color); padding: 15px; display: flex; gap: 10px; background: white; }
+        input { flex: 1; border: 2px solid var(--main-color); padding: 12px; border-radius: 15px; outline: none; font-size: 1rem; }
+        button { background: var(--accent-color); border: none; color: white; padding: 10px 20px; border-radius: 15px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #e58e8e; transform: scale(1.05); }
+        .loading { font-size: 0.8rem; color: #999; margin-top: 5px; }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <div class="header">🚀 과학 탐험대 질문센터</div>
+    <div class="header">🌟 호기심 해결사 흥덕이</div>
     <div id="chat-window">
-        <div class="msg bot">안녕! 나는 과학 탐험대 도우미 '과톡이'예요. 궁금한 과학 이야기를 들려줄게요! 🧪</div>
+        <div class="msg bot">안녕! 나는 궁금한 건 무엇이든 알려주는 '흥덕이' 선생님이에요. 우리 친구는 오늘 어떤 신기한 과학 이야기가 궁금한가요?</div>
     </div>
     <div class="input-area">
-        <input type="text" id="user-input" placeholder="무엇이 궁금한가요?" onkeypress="if(event.keyCode==13) sendMessage()">
-        <button onclick="sendMessage()">질문하기</button>
+        <input type="text" id="user-input" placeholder="흥덕이에게 물어보세요!" onkeypress="if(event.keyCode==13) sendMessage()">
+        <button id="send-btn" onclick="sendMessage()">질문하기</button>
     </div>
 </div>
 
 <script>
-    const API_KEY = "여기에_선생님의_API_키를_넣으세요"; // ❗ 필수: 발급받은 API 키 입력
-    const SYSTEM_PROMPT = "너는 초등학교 3~4학년 수준으로 과학을 설명하는 다정한 선생님이야. 어려운 용어는 쉬운 비유로 풀어서 설명해주고, 답변은 3~4문장으로 짧고 재미있게 해줘.";
-
-    async function sendMessage() {
-        const inputField = document.getElementById("user-input");
-        const chatWindow = document.getElementById("chat-window");
-        const message = inputField.value.trim();
-        if (!message) return;
-
-        // 사용자 메시지 표시
-        addMessage(message, 'user');
-        inputField.value = "";
-
-        // AI 응답 요청
-        try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: SYSTEM_PROMPT + "\n질문: " + message }] }]
-                })
-            });
-            const data = await response.json();
-            const aiText = data.candidates[0].content.parts[0].text;
-            addMessage(aiText, 'bot');
-        } catch (error) {
-            addMessage("에고, 잠시 과톡이가 생각 중이에요. 다시 시도해볼까요?", 'bot');
-        }
-    }
-
-    function addMessage(text, sender) {
-        const chatWindow = document.getElementById("chat-window");
-        const msgDiv = document.createElement("div");
-        msgDiv.classList.add("msg", sender);
-        msgDiv.innerText = text;
-        chatWindow.appendChild(msgDiv);
-        chatWindow.scrollTop = chatWindow.scrollHeight;
-    }
-</script>
-</body>
-</html>
+    // ❗ 아래 부분에 선생님의 API 키를 입력하세요.
+    const API_KEY = "AIzaSyBi-KD5Az4oMagEyBc6Bna-nnyO-a24guU"; 
+    
+    const SYSTEM_PROMPT = `이름: 호기심 해결사 흥덕이
+대상: 초등학교 3~4학년 학생 (만 9~10세)
+말투: 친절하고 다정한 선생님 또는 친한 형/누나 같은 말투 (~해요, ~인가요? 체 사용).
+답변 원칙:
+1. 눈높이 설명: 전문 용어 대신 일상적인 단어를 사용하세요. (예: '응고' -> '딱딱하게
